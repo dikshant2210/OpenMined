@@ -48,9 +48,16 @@ namespace OpenMined.Syft.Tensor
             else
             {
                 // run Addition on the CPU
-                result.Data = data.AsParallel().Zip(x.Data.AsParallel(), (a, b) => a + b).ToArray();
-
-                return result;
+                if (inline)
+                {
+                    this.Data = data.AsParallel().Zip(x.Data.AsParallel(), (a, b) => a + b).ToArray();
+                    return this;
+                }
+                else
+                {
+                    result.Data = data.AsParallel().Zip(x.Data.AsParallel(), (a, b) => a + b).ToArray();
+                    return result;
+                }
             }
 
         }
@@ -160,7 +167,7 @@ namespace OpenMined.Syft.Tensor
         }
 
 
-        public IntTensor View(int[] new_shape, bool inline = true)
+        public IntTensor View(int[] new_shape, bool inline = false)
         {
             if (!IsContiguous())
             {
@@ -445,6 +452,26 @@ namespace OpenMined.Syft.Tensor
 
             var stride = strides[0] + strides[1];
             return Enumerable.Range(0, shape.Min()).AsParallel().Select(i => this[i * stride]).Sum();
+        }
+
+        public IntTensor Unsqueeze(int dim, bool inline = false)
+        {
+            int[] new_shape = new int[shape.Length + 1];
+            int j = 0;
+            for (int i = 0; i < new_shape.Length; i++)
+            {
+                if (i == dim)
+                {
+                    new_shape[i] = 1;
+                }
+                else
+                {
+                    new_shape[i] = shape[j];
+                    j += 1;
+                }
+            }
+
+            return View(new_shape, inline: inline);
         }
 
         // closes class and namespace

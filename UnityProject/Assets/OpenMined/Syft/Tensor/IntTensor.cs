@@ -442,6 +442,22 @@ namespace OpenMined.Syft.Tensor
                 {
                     return this.GetProto().ToString();
                 }
+                case "unsqueeze":
+                {
+                    int dim = int.Parse(msgObj.tensorIndexParams[0]);
+                    if(dim < 0)
+                        dim = shape.Length + dim + 1;
+                    var result = Unsqueeze(dim, inline: false);
+                    return result.Id.ToString();
+                }
+                case "unsqueeze_":
+                {
+                    int dim = int.Parse(msgObj.tensorIndexParams[0]);
+                    if (dim < 0)
+                        dim = shape.Length + dim + 1;
+                    var result = Unsqueeze(dim, inline: true);
+                    return result.Id.ToString();
+                }
             }
             return "IntTensor.processMessage: Command not found:" + msgObj.functionCall;
         }
